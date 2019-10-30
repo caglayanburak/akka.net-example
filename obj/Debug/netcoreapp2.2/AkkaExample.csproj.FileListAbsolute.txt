@@ -1,0 +1,11 @@
+/Users/burakcaglayan/Projects/Akka-Sample/AkkaExample/bin/Debug/netcoreapp2.2/AkkaExample.deps.json
+/Users/burakcaglayan/Projects/Akka-Sample/AkkaExample/bin/Debug/netcoreapp2.2/AkkaExample.runtimeconfig.json
+/Users/burakcaglayan/Projects/Akka-Sample/AkkaExample/bin/Debug/netcoreapp2.2/AkkaExample.runtimeconfig.dev.json
+/Users/burakcaglayan/Projects/Akka-Sample/AkkaExample/bin/Debug/netcoreapp2.2/AkkaExample.dll
+/Users/burakcaglayan/Projects/Akka-Sample/AkkaExample/bin/Debug/netcoreapp2.2/AkkaExample.pdb
+/Users/burakcaglayan/Projects/Akka-Sample/AkkaExample/obj/Debug/netcoreapp2.2/AkkaExample.csprojAssemblyReference.cache
+/Users/burakcaglayan/Projects/Akka-Sample/AkkaExample/obj/Debug/netcoreapp2.2/AkkaExample.csproj.CoreCompileInputs.cache
+/Users/burakcaglayan/Projects/Akka-Sample/AkkaExample/obj/Debug/netcoreapp2.2/AkkaExample.AssemblyInfoInputs.cache
+/Users/burakcaglayan/Projects/Akka-Sample/AkkaExample/obj/Debug/netcoreapp2.2/AkkaExample.AssemblyInfo.cs
+/Users/burakcaglayan/Projects/Akka-Sample/AkkaExample/obj/Debug/netcoreapp2.2/AkkaExample.dll
+/Users/burakcaglayan/Projects/Akka-Sample/AkkaExample/obj/Debug/netcoreapp2.2/AkkaExample.pdb
