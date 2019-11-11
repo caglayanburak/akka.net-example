@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace AkkaExample
 {
-    public class OrderDetailActor : UntypedActor
+    public class OrderDetailActor : ReceiveActor
     {
         private IHttpClientFactory _factory;
         private readonly IContainer _container;
@@ -21,6 +21,37 @@ namespace AkkaExample
             _client = _factory.CreateClient("mock");
             _database = ConnectionMultiplexerSingleton.Database;
 
+            Receive<OrderDetail>(orderDetail =>
+            {
+                //Api call for data and validation
+
+                if (ConnectionMultiplexerSingleton.retryCount < 1 && orderDetail.OrderId == 1 && (orderDetail.Id == 8))
+                {
+                    throw new NullReferenceException("test");
+                }
+
+                if (orderDetail.Id == 8)
+                {
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    Console.WriteLine("geldi");
+                }
+
+                HttpResponseMessage response = _client.GetAsync(string.Empty).Result;
+                response.EnsureSuccessStatusCode();
+                string responseBody = response.Content.ReadAsStringAsync().Result;
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(
+                    $"Order detail message came Id:{orderDetail.Id} - {responseBody} \n Time:{DateTime.Now.ToString("hh:mm:ss.fff")} \n ThreadId: {Thread.CurrentThread.ManagedThreadId}");
+                orderDetail.Message = $"test-{orderDetail.Id}";
+
+
+
+                _database.StringIncrementAsync($"orderdetail-{orderDetail.OrderId}");
+                //Sender.Tell(orderDetail, Self);//for Ask method
+
+            });
+
         }
 
         protected override void PostRestart(Exception reason)
@@ -33,40 +64,31 @@ namespace AkkaExample
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("*******PreRestart");
-            Self.Forward(message);
-            ConnectionMultiplexerSingleton.retryCount++;
+            
+            base.PreRestart(reason, message);
+            //ConnectionMultiplexerSingleton.retryCount++;
+            Self.Tell(message);
+            //Self.Forward(message);
         }
 
         protected override void PostStop()
         {
+            Console.ForegroundColor = ConsoleColor.Blue;
+
+            Console.WriteLine("*******PostStop");
             base.PostStop();
         }
+    }
 
-        protected override void OnReceive(object message)
+    sealed class Retry
+    {
+        public readonly object Message;
+        public readonly int Ttl;
+
+        public Retry(object message, int ttl)
         {
-
-            var orderDetail = (OrderDetail)message;
-
-            //Api call for data and validation
-
-            if (ConnectionMultiplexerSingleton.retryCount < 6 && orderDetail.OrderId == 1 && (orderDetail.Id == 8))
-            {
-                throw new NullReferenceException("test");
-            }
-
-            HttpResponseMessage response = _client.GetAsync(string.Empty).Result;
-            response.EnsureSuccessStatusCode();
-            string responseBody = response.Content.ReadAsStringAsync().Result;
-            Console.BackgroundColor = ConsoleColor.Black;
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Order detail message came Id:{orderDetail.Id} - {responseBody} \n Time:{DateTime.Now.ToString("hh:mm:ss.fff")} \n ThreadId: {Thread.CurrentThread.ManagedThreadId}");
-            orderDetail.Message = $"test-{orderDetail.Id}";
-
-
-
-            _database.StringIncrementAsync($"orderdetail-{orderDetail.OrderId}");
-            //Sender.Tell(orderDetail, Self);//for Ask method
-
+            Message = message;
+            Ttl = ttl;
         }
     }
 }
