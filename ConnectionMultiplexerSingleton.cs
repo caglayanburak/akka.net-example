@@ -16,29 +16,27 @@ namespace AkkaExample
 
         private static object lockObject = new object();
 
-        public static IDatabase Database
+        public static ConnectionMultiplexer Connection
         {
             get
             {
-                if (_database == null)
+                if (_connection == null)
                 {
                     lock (lockObject)
                     {
-                        if (_database == null)
+                        if (_connection == null)
                         {
-                            var conn = ConnectionMultiplexer.Connect(option);
-                            _database = conn.GetDatabase(0);
-                            Console.WriteLine("kaç");
+                          _connection = ConnectionMultiplexer.Connect(option);
                         }
                     }
                 }
 
-                return _database;
+                return _connection;
             }
         }
 
         //private static IDatabase _instance;
-        private static IDatabase _database;
+        private static ConnectionMultiplexer _connection;
 
     }
 }

@@ -1,9 +1,9 @@
 using Akka.Actor;
 using Autofac;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using StackExchange.Redis;
 
 namespace AkkaExample
 {
@@ -11,11 +11,12 @@ namespace AkkaExample
     {
         private readonly IContainer _container;
         private IDatabase _database;
+        private string channelPattern = "order-actor*";
 
         public OrderActor(IContainer container)
         {
             _container = container;
-            _database = ConnectionMultiplexerSingleton.Database;
+            _database = ConnectionMultiplexerSingleton.Connection.GetDatabase(0);
 
             Receive<Order>(order =>
             {
@@ -24,7 +25,7 @@ namespace AkkaExample
                 _database.StringSet($"orderdetail-{order.Id}", 0);
                 var orderDetails = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
-                for (int i = 11; i <= 11; i++)
+                for (int i = 11; i <= order.OrderDetailCount; i++)
                 {
                     orderDetails.Add(i);
                 }
@@ -43,11 +44,13 @@ namespace AkkaExample
                     //Console.WriteLine($"Order-Actor => task result:{orderDetailId} \n Time: {DateTime.Now.ToString("hh:mm:ss.fff")} \n Thread Id: {Thread.CurrentThread.ManagedThreadId} \n Result:{result.Result.Message}");
 
                     //Tell
-                    orderDetailActor.Tell(new OrderDetail
+                    var message = new OrderDetail
                     {
                         Id = orderDetailId,
-                        OrderId = order.Id
-                    });
+                        OrderId = order.Id,
+                        Order = order
+                    };
+                    orderDetailActor.Tell(new Retry(message, 5));
 
                     //Sender.Tell(orderDetailActor);
 
@@ -55,19 +58,19 @@ namespace AkkaExample
                 }
             });
         }
-        
+
 
         protected override SupervisorStrategy SupervisorStrategy()
         {
             return new OneForOneStrategy(
-                maxNrOfRetries:4,
-                withinTimeRange:TimeSpan.FromMinutes(5), 
+                maxNrOfRetries: 5,
+                withinTimeRange: TimeSpan.FromSeconds(10),
                 localOnlyDecider: ex =>
                 {
                     switch (ex)
                     {
                         case ApplicationException ae:
-                            
+
                             Console.WriteLine("*****Go go go");
                             return Directive.Resume;
                         case NullReferenceException ne:
@@ -76,10 +79,10 @@ namespace AkkaExample
                         default:
                             return Directive.Stop;
                     }
-                    
+
                 });
         }
-        
-        
+
+
     }
 }

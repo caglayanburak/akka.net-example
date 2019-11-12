@@ -16,7 +16,7 @@ namespace AkkaExample
         {
             int minThread;
             int completionPortThread;
-            //ThreadPool.SetMinThreads(100, 100);
+            ThreadPool.SetMinThreads(1000, 1000);
             ThreadPool.GetMinThreads(out minThread, out completionPortThread);
             Console.WriteLine($"min Thread:{minThread} - completion:{completionPortThread}");
             var services = ConfigureServices();
@@ -41,7 +41,8 @@ namespace AkkaExample
                 var inventoryActor = actorSystems.ActorOf(Props.Create<OrderActor>(args: container), $"order-actor-{i}");
                 inventoryActor.Tell(new Order()
                 {
-                    Id = i
+                    Id = i,
+                    OrderDetailCount = 16000
                 });
             }
 

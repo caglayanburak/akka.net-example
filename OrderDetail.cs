@@ -5,5 +5,6 @@ namespace AkkaExample
         public int Id { get; set; } 
         public int OrderId { get; set; }
         public string Message { get; internal set; }
+        public Order Order { get; set; }
     }
 }
