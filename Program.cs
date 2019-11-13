@@ -1,8 +1,10 @@
 ﻿using Akka.Actor;
+using Akka.Configuration;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.IO;
 using System.Threading;
 
 
@@ -33,18 +35,33 @@ namespace AkkaExample
 
             // Generate a provider
 
-            var actorSystems = ActorSystem.Create("test-actor-system");
-            actorSystems.UseAutofac(container);
+            //var actorSystems = ActorSystem.Create("test-actor-system");
+            //actorSystems.UseAutofac(container);
+            
+            //for (int i = 1; i < 2; i++)
+            //{
+            //    var inventoryActor = actorSystems.ActorOf(Props.Create<OrderActor>(args: container), $"order-actor-{i}");
+            //    inventoryActor.Tell(new Order()
+            //    {
+            //        Id = i,
+            //        OrderDetailCount = 1000
+            //    });
+            //}
 
-            for (int i = 1; i < 2; i++)
+            ExampleActorSystem.Start();
+
+            string command = string.Empty;
+            while (command != "exit")
             {
-                var inventoryActor = actorSystems.ActorOf(Props.Create<OrderActor>(args: container), $"order-actor-{i}");
-                inventoryActor.Tell(new Order()
+                command = Console.ReadLine();
+
+                if (command != "exit")
                 {
-                    Id = i,
-                    OrderDetailCount = 16000
-                });
+                    ExampleActorSystem.ExampleActor.Tell(command);
+                }
             }
+
+            ExampleActorSystem.Stop();
 
             Console.ReadLine();
         }
